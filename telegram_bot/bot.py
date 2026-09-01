@@ -9,18 +9,9 @@ from app.database import async_session
 
 logger = logging.getLogger(__name__)
 
-# Set up storage — use Redis for persistent FSM state if available
-try:
-    from aiogram.fsm.storage.redis import RedisStorage
-    if settings.REDIS_URL:
-        storage = RedisStorage.from_url(settings.REDIS_URL)
-        logger.info("Using Redis FSM storage")
-    else:
-        storage = MemoryStorage()
-        logger.info("Using in-memory FSM storage")
-except ImportError:
-    storage = MemoryStorage()
-    logger.info("Redis storage not available, using in-memory FSM storage")
+# Set up storage — use MemoryStorage for lightweight local execution
+storage = MemoryStorage()
+logger.info("Using in-memory FSM storage")
 
 # Handle token with robust session configuration for Windows
 if settings.TELEGRAM_BOT_TOKEN:

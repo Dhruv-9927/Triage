@@ -102,17 +102,16 @@ async def list_appointments(
         select(Appointment)
         .options(
             selectinload(Appointment.doctor),
-            selectinload(Appointment.patient),
+            selectinload(Appointment.patient).selectinload(Patient.user),
             selectinload(Appointment.queue_token)
         )
-        .order_by(Appointment.created_at.asc())
+        .order_by(Appointment.created_at.desc())
     )
     
     if status:
         stmt = stmt.where(Appointment.status == status)
     if doctor_id:
         stmt = stmt.where(Appointment.doctor_id == doctor_id)
-
 
     result = await db.execute(stmt)
     appointments = result.scalars().all()
@@ -122,6 +121,12 @@ async def list_appointments(
         fac = await db.get(Facility, app.facility_id)
         token = app.queue_token
         
+        p_name = "Patient"
+        if app.patient:
+            p_name = app.patient.full_name or (app.patient.user.full_name if app.patient.user else "Patient")
+        
+        is_tg = (app.consultation_type == "TELEGRAM") or (app.patient and app.patient.user and app.patient.user.telegram_chat_id is not None)
+
         enriched_list.append({
             "id": str(app.id),
             "patient_id": str(app.patient_id),
@@ -139,7 +144,8 @@ async def list_appointments(
             "doctor_specialization": app.doctor.specialization if app.doctor else "General Medicine",
             "facility_name": fac.name if fac else "Healthcare Facility",
             "facility_type": fac.facility_type if fac else "Hospital",
-            "patient_name": app.patient.full_name if app.patient else "Priya Sharma",
+            "patient_name": p_name,
+            "channel": "TELEGRAM" if is_tg else "WEB",
             "token_number": token.token_number if token else "TKN-001",
             "queue_position": token.position if token else 1,
             "estimated_wait_minutes": token.estimated_wait_minutes if token else 10,

@@ -5,6 +5,7 @@ from app.schemas.triage import SymptomInput, TriageResponse, TriageAssessment
 from app.services.triage_service import assess_symptoms
 from app.services.hospital_discovery_service import fetch_real_nearby_hospitals
 from app.models.triage_session import TriageSession
+from app.models.patient import Patient
 import uuid
 import json
 

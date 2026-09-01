@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import { appointmentsApi } from '../../api/appointments';
+import { triageApi } from '../../api/triage';
 import { apiClient } from '../../api/client';
-import { Users, CheckCircle2, Stethoscope, AlertCircle, Video, Activity, Sparkles, RefreshCw, PhoneCall, Check } from 'lucide-react';
+import { 
+  Users, CheckCircle2, Stethoscope, AlertCircle, Video, Activity, Sparkles, 
+  RefreshCw, PhoneCall, Check, Send, Bot, Clock, MessageSquare, ShieldAlert
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
@@ -12,19 +16,27 @@ export default function DoctorDashboard() {
   const navigate = useNavigate();
   const [isAvailable, setIsAvailable] = useState(true);
   const [queuePatients, setQueuePatients] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
+  const [triageHistory, setTriageHistory] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'active' | 'triage' | 'completed'>('active');
   const [isLoading, setIsLoading] = useState(true);
   const [isCallingNext, setIsCallingNext] = useState(false);
 
   const loadData = async (showToast = false) => {
     try {
-      const appts = await appointmentsApi.getAppointments().catch(() => []);
+      const [appts, triage] = await Promise.all([
+        appointmentsApi.getAppointments().catch(() => []),
+        triageApi.getTriageHistory().catch(() => [])
+      ]);
+
       if (Array.isArray(appts)) {
         setQueuePatients(appts);
       }
-      if (showToast) toast.success('Queue refreshed');
+      if (Array.isArray(triage)) {
+        setTriageHistory(triage);
+      }
+      if (showToast) toast.success('Queue & Telegram Triage refreshed');
     } catch (err) {
-      console.error('Failed to load appointments:', err);
+      console.error('Failed to load appointments/triage:', err);
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +44,7 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(() => loadData(false), 5000);
+    const interval = setInterval(() => loadData(false), 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -56,17 +68,13 @@ export default function DoctorDashboard() {
     const nextPatient = activeQueue[0];
 
     try {
-      // 1. Try advancing via queue backend
-      const res = await apiClient.post('/queue/advance').catch(() => null);
-      
-      // 2. Also mark appointment as COMPLETED
+      await apiClient.post('/queue/advance').catch(() => null);
       await appointmentsApi.updateAppointment(nextPatient.id, { status: 'COMPLETED' }).catch(() => null);
 
       toast.success(
         `📢 Calling ${nextPatient.patient_name || 'Patient'} (${nextPatient.token_number || 'Token #1'})! Previous patient cleared.`
       );
 
-      // Immediately advance state locally
       setQueuePatients((prev) =>
         prev.map((p) => (p.id === nextPatient.id ? { ...p, status: 'COMPLETED' } : p))
       );
@@ -97,8 +105,11 @@ export default function DoctorDashboard() {
       p.chief_complaint?.toLowerCase().includes('chest') ||
       p.chief_complaint?.toLowerCase().includes('breath') ||
       p.chief_complaint?.toLowerCase().includes('emergency') ||
-      p.chief_complaint?.toLowerCase().includes('severe')
+      p.chief_complaint?.toLowerCase().includes('severe') ||
+      p.chief_complaint?.toLowerCase().includes('urgent')
   ).length;
+
+  const telegramTriageCount = triageHistory.filter(t => t.channel === 'TELEGRAM').length;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
@@ -113,7 +124,7 @@ export default function DoctorDashboard() {
             Welcome, {user?.full_name || 'Dr. Rajesh Kumar'}
           </h1>
           <p className="text-xs sm:text-sm text-[#7A7265] mt-0.5">
-            General Medicine & Triage Routing Station • Live OPD Queue
+            General Medicine & Triage Routing Station • Live OPD & Telegram Stream
           </p>
         </div>
 
@@ -139,52 +150,62 @@ export default function DoctorDashboard() {
       </div>
 
       {/* Stats Counter */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-[#E8E2D8] shadow-warm-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#FAF7F2] border border-[#E8E2D8] text-[#4A2E1B] rounded-xl flex items-center justify-center font-bold">
-            <Users className="w-6 h-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-[#E8E2D8] shadow-warm-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-[#FAF7F2] border border-[#E8E2D8] text-[#4A2E1B] rounded-xl flex items-center justify-center font-bold">
+            <Users className="w-5 h-5" />
           </div>
           <div>
             <div className="text-2xl font-serif font-bold text-[#2B1810]">{activeQueue.length}</div>
-            <div className="text-xs text-[#7A7265] font-medium">Patients Waiting in Queue</div>
+            <div className="text-[11px] text-[#7A7265] font-medium">Patients in Queue</div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#E8E2D8] shadow-warm-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#FDF6EE] border border-[#F6E1C8] text-[#C86D51] rounded-xl flex items-center justify-center font-bold">
-            <Activity className="w-6 h-6" />
+        <div className="bg-white p-5 rounded-2xl border border-[#E8E2D8] shadow-warm-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-[#EBF3FA] border border-[#D0E2F2] text-[#2563EB] rounded-xl flex items-center justify-center font-bold">
+            <Bot className="w-5 h-5 text-[#2563EB]" />
+          </div>
+          <div>
+            <div className="text-2xl font-serif font-bold text-[#2563EB]">{telegramTriageCount}</div>
+            <div className="text-[11px] text-[#7A7265] font-medium">Telegram Triage Feeds</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-[#E8E2D8] shadow-warm-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-[#FDF6EE] border border-[#F6E1C8] text-[#C86D51] rounded-xl flex items-center justify-center font-bold">
+            <Activity className="w-5 h-5" />
           </div>
           <div>
             <div className="text-2xl font-serif font-bold text-[#C86D51]">{urgentCount}</div>
-            <div className="text-xs text-[#7A7265] font-medium">Urgent Triage Acuity</div>
+            <div className="text-[11px] text-[#7A7265] font-medium">Urgent Acuity Cases</div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#E8E2D8] shadow-warm-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#EBF5EC] border border-[#D4EAD6] text-[#2E7D32] rounded-xl flex items-center justify-center font-bold">
-            <CheckCircle2 className="w-6 h-6" />
+        <div className="bg-white p-5 rounded-2xl border border-[#E8E2D8] shadow-warm-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-[#EBF5EC] border border-[#D4EAD6] text-[#2E7D32] rounded-xl flex items-center justify-center font-bold">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
             <div className="text-2xl font-serif font-bold text-[#2E7D32]">{completedQueue.length}</div>
-            <div className="text-xs text-[#7A7265] font-medium">Completed Consultations</div>
+            <div className="text-[11px] text-[#7A7265] font-medium">Completed Consults</div>
           </div>
         </div>
       </div>
 
-      {/* Live Queue Section */}
+      {/* Main Section */}
       <div className="bg-white rounded-3xl border border-[#E8E2D8] shadow-warm-sm overflow-hidden">
         <div className="p-6 border-b border-[#F0EAE1] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-lg font-serif font-bold text-[#2B1810] flex items-center gap-2">
               <Stethoscope className="w-5 h-5 text-[#8C5D3E]" />
-              <span>Live OPD Patient Queue</span>
+              <span>Live Patient Operations & Telegram Stream</span>
             </h2>
             <p className="text-xs text-[#7A7265]">
-              Real-time sequence of arriving clinic and Telegram booked patients
+              Real-time synchronization across clinic visits, Web PWA, and @TriageSmartBot Telegram users
             </p>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
             {/* Tab Selector */}
             <div className="flex bg-[#FAF7F2] p-1 rounded-xl border border-[#E8E2D8] text-xs">
               <button
@@ -196,6 +217,17 @@ export default function DoctorDashboard() {
                 }`}
               >
                 Active Queue ({activeQueue.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('triage')}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
+                  activeTab === 'triage'
+                    ? 'bg-[#2563EB] text-white shadow-xs'
+                    : 'text-[#6B6358] hover:text-[#2B1810]'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5" />
+                <span>Telegram Triage ({triageHistory.length})</span>
               </button>
               <button
                 onClick={() => setActiveTab('completed')}
@@ -232,8 +264,86 @@ export default function DoctorDashboard() {
 
         {isLoading ? (
           <div className="p-12 flex justify-center">
-            <LoadingSpinner text="Fetching live queue records..." />
+            <LoadingSpinner text="Fetching live queue & Telegram records..." />
           </div>
+        ) : activeTab === 'triage' ? (
+          /* TAB 2: LIVE TELEGRAM & APP TRIAGE FEED */
+          triageHistory.length === 0 ? (
+            <div className="p-12 text-center text-xs text-[#7A7265]">
+              No triage assessments recorded yet. As soon as a user sends symptoms to @TriageSmartBot, they appear here live!
+            </div>
+          ) : (
+            <div className="divide-y divide-[#F0EAE1]">
+              {triageHistory.map((triageItem, idx) => {
+                const isEmergency = triageItem.urgency_level === 'EMERGENCY';
+                const isUrgent = triageItem.urgency_level === 'URGENT';
+                const isTelegram = triageItem.channel === 'TELEGRAM';
+
+                return (
+                  <div key={triageItem.id || idx} className="p-5 hover:bg-[#FAF7F2] transition space-y-2.5">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-serif font-bold text-[#2B1810] text-base">
+                          {triageItem.patient_name || 'Telegram Patient'}
+                        </span>
+                        {isTelegram ? (
+                          <span className="text-[11px] bg-[#EBF3FA] text-[#2563EB] border border-[#D0E2F2] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Send className="w-3 h-3 text-[#2563EB]" />
+                            Telegram Bot
+                          </span>
+                        ) : (
+                          <span className="text-[11px] bg-[#FAF7F2] text-[#6B6358] border border-[#E8E2D8] font-semibold px-2 py-0.5 rounded-md">
+                            Web PWA
+                          </span>
+                        )}
+                        <span
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 ${
+                            isEmergency
+                              ? 'bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA]'
+                              : isUrgent
+                              ? 'bg-[#FDF6EE] text-[#C86D51] border border-[#F6E1C8]'
+                              : 'bg-[#EBF5EC] text-[#2E7D32] border border-[#D4EAD6]'
+                          }`}
+                        >
+                          {isEmergency || isUrgent ? <ShieldAlert className="w-3 h-3" /> : null}
+                          {triageItem.urgency_level}
+                        </span>
+                        <span className="text-[11px] text-[#7A7265] bg-white border border-[#E8E2D8] px-2 py-0.5 rounded-md">
+                          Specialty: {triageItem.recommended_specialty}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#8C8275] flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#8C8275]" />
+                        <span>{triageItem.created_at ? new Date(triageItem.created_at).toLocaleTimeString() : 'Just now'}</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#FAF7F2] p-3 rounded-xl border border-[#EDE7DC] space-y-1">
+                      <div className="text-xs text-[#2B1810]">
+                        <strong>Reported Symptoms:</strong> &ldquo;{triageItem.raw_symptoms}&rdquo;
+                      </div>
+                      {triageItem.ai_response && (
+                        <div className="text-[11px] text-[#5E574E] mt-1">
+                          <strong>AI Advisory Note:</strong> {triageItem.ai_response.length > 200 ? triageItem.ai_response.slice(0, 200) + '...' : triageItem.ai_response}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-[#7A7265] pt-1">
+                      <span>Language: <strong className="uppercase">{triageItem.language}</strong></span>
+                      <button
+                        onClick={() => navigate('/appointments')}
+                        className="text-[#4A2E1B] hover:underline font-semibold flex items-center gap-1"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>Manage in Appointments</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )
         ) : (activeTab === 'active' ? activeQueue : completedQueue).length === 0 ? (
           <div className="p-12 text-center text-xs text-[#7A7265]">
             {activeTab === 'active'
@@ -241,15 +351,18 @@ export default function DoctorDashboard() {
               : 'No completed consultations recorded yet today.'}
           </div>
         ) : (
+          /* TAB 1 & 3: ACTIVE QUEUE OR COMPLETED */
           <div className="divide-y divide-[#F0EAE1]">
             {(activeTab === 'active' ? activeQueue : completedQueue).map((patient, index) => {
               const isUrgent =
                 patient.chief_complaint?.toLowerCase().includes('chest') ||
                 patient.chief_complaint?.toLowerCase().includes('breath') ||
                 patient.chief_complaint?.toLowerCase().includes('emergency') ||
-                patient.chief_complaint?.toLowerCase().includes('severe');
+                patient.chief_complaint?.toLowerCase().includes('severe') ||
+                patient.chief_complaint?.toLowerCase().includes('urgent');
 
               const isCompleted = patient.status === 'COMPLETED';
+              const isTelegram = patient.consultation_type === 'TELEGRAM' || patient.channel === 'TELEGRAM';
               const displayPosition = activeTab === 'active' ? index + 1 : '✓';
 
               return (
@@ -276,6 +389,12 @@ export default function DoctorDashboard() {
                         <span className="font-serif font-bold text-[#2B1810] text-base">
                           {patient.patient_name || 'Patient'}
                         </span>
+                        {isTelegram && (
+                          <span className="text-[11px] bg-[#EBF3FA] text-[#2563EB] border border-[#D0E2F2] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Send className="w-3 h-3 text-[#2563EB]" />
+                            Telegram
+                          </span>
+                        )}
                         {isCompleted ? (
                           <span className="text-[11px] bg-[#EBF5EC] text-[#2E7D32] border border-[#D4EAD6] font-bold px-2 py-0.5 rounded-md">
                             COMPLETED
@@ -283,7 +402,7 @@ export default function DoctorDashboard() {
                         ) : isUrgent ? (
                           <span className="text-[11px] bg-[#FDF6EE] text-[#C86D51] border border-[#F6E1C8] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
                             <AlertCircle className="w-3 h-3" />
-                            URGENT (AI Triage)
+                            URGENT
                           </span>
                         ) : (
                           <span className="text-[11px] bg-[#FAF7F2] text-[#6B6358] border border-[#E8E2D8] font-semibold px-2 py-0.5 rounded-md">

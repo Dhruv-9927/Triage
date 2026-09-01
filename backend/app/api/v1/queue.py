@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -7,7 +7,7 @@ from app.models.queue_token import QueueToken
 from app.models.doctor import Doctor
 from app.models.facility import Facility
 from app.models.patient import Patient
-from app.services.queue_service import get_queue_status, check_in_patient
+from app.services.queue_service import get_queue_status, check_in_patient, advance_queue
 import uuid
 
 router = APIRouter()

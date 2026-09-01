@@ -47,6 +47,37 @@ async def assess(input_data: SymptomInput, db: AsyncSession = Depends(get_db)):
         "facilities": facilities
     }
 
+from sqlalchemy.orm import selectinload
+from sqlalchemy.future import select
+
 @router.get("/history")
 async def get_history(db: AsyncSession = Depends(get_db)):
-    return []
+    stmt = (
+        select(TriageSession)
+        .options(selectinload(TriageSession.patient).selectinload(Patient.user))
+        .order_by(TriageSession.created_at.desc())
+    )
+    res = await db.execute(stmt)
+    sessions = res.scalars().all()
+
+    out = []
+    for s in sessions:
+        p_name = "Telegram Patient"
+        if s.patient:
+            p_name = s.patient.full_name or (s.patient.user.full_name if s.patient.user else "Patient")
+        
+        out.append({
+            "id": str(s.id),
+            "patient_id": str(s.patient_id) if s.patient_id else None,
+            "patient_name": p_name,
+            "channel": s.channel or "TELEGRAM",
+            "telegram_chat_id": s.telegram_chat_id,
+            "language": s.language or "en",
+            "raw_symptoms": s.raw_symptoms,
+            "urgency_level": s.urgency_level or "ROUTINE",
+            "red_flags_detected": s.red_flags_detected,
+            "ai_response": s.ai_response,
+            "recommended_specialty": s.recommended_specialty or "General Medicine",
+            "created_at": s.created_at.isoformat() if s.created_at else None
+        })
+    return out

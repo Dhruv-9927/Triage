@@ -101,52 +101,50 @@ async def process_symptoms(message: Message, state: FSMContext):
         except Exception as e:
             await db.rollback()
 
+        # Find top/default facility and doctor for the triage queue
+        fac_stmt = select(Facility).where(Facility.is_active == True).limit(1)
+        fac_res = await db.execute(fac_stmt)
+        facility = fac_res.scalars().first()
+        fac_id = facility.id if facility else uuid.uuid4()
+        fac_name = facility.name if facility else "AIIMS Delhi"
+
+        doc_stmt = select(Doctor).where(Doctor.facility_id == fac_id).limit(1)
+        doc_res = await db.execute(doc_stmt)
+        doctor = doc_res.scalars().first()
+        doc_id = doctor.id if doctor else uuid.uuid4()
+        doc_name = doctor.full_name if doctor else "Dr. Rajesh Kumar"
+
+        # Create Appointment ticket for Doctor Dashboard visibility
+        now = datetime.now()
+        appt = Appointment(
+            patient_id=patient.id,
+            facility_id=fac_id,
+            doctor_id=doc_id,
+            scheduled_start=now,
+            scheduled_end=now + timedelta(minutes=30),
+            status="SCHEDULED",
+            consultation_type="TELEGRAM",
+            chief_complaint=f"[{urgency}] {symptoms}"
+        )
+        db.add(appt)
+        await db.commit()
+        await db.refresh(appt)
+
+        # Create Queue Token
+        token = await create_queue_token(db, appt.id)
+
+        # Publish event to Doctor Dashboard & WebSockets
+        await event_bus.publish(APPOINTMENT_CREATED, {
+            "appointment_id": str(appt.id),
+            "facility_id": str(fac_id),
+            "doctor_id": str(doc_id),
+            "telegram_chat_id": message.chat.id,
+            "preferred_language": lang,
+            "urgency": urgency
+        })
+
         if is_severe:
-            # 🔴 SEVERE CASE: Auto-generate an urgent doctor ticket on the Doctor Dashboard
-            # Find closest/top facility
-            fac_stmt = select(Facility).where(Facility.is_active == True).limit(1)
-            fac_res = await db.execute(fac_stmt)
-            facility = fac_res.scalars().first()
-            fac_id = facility.id if facility else uuid.uuid4()
-            fac_name = facility.name if facility else "AIIMS Delhi Emergency"
-
-            # Find available doctor
-            doc_stmt = select(Doctor).where(Doctor.facility_id == fac_id).limit(1)
-            doc_res = await db.execute(doc_stmt)
-            doctor = doc_res.scalars().first()
-            doc_id = doctor.id if doctor else uuid.uuid4()
-            doc_name = doctor.full_name if doctor else "Duty Emergency Physician"
-
-            # Create Appointment
-            now = datetime.now()
-            appt = Appointment(
-                patient_id=patient.id,
-                facility_id=fac_id,
-                doctor_id=doc_id,
-                scheduled_start=now,
-                scheduled_end=now + timedelta(minutes=30),
-                status="SCHEDULED",
-                consultation_type="IN_PERSON",
-                chief_complaint=f"[URGENT TRIAGE] {symptoms}"
-            )
-            db.add(appt)
-            await db.commit()
-            await db.refresh(appt)
-
-
-            # Create Queue Token
-            token = await create_queue_token(db, appt.id)
-
-            # Publish event to Doctor Dashboard & WebSockets
-            await event_bus.publish(APPOINTMENT_CREATED, {
-                "appointment_id": str(appt.id),
-                "facility_id": str(fac_id),
-                "doctor_id": str(doc_id),
-                "telegram_chat_id": message.chat.id,
-                "preferred_language": lang,
-                "urgency": urgency
-            })
-
+            # 🔴 SEVERE CASE: Urgent ticket notification
             urgent_msg = get_text("urgent_ticket_created", lang).format(
                 token=token.token_number,
                 fac=fac_name,
@@ -159,15 +157,18 @@ async def process_symptoms(message: Message, state: FSMContext):
             await message.answer(urgent_msg, parse_mode="Markdown", reply_markup=urgency_keyboard(is_emergency, lang))
 
         else:
-            # 🟢 MILD / ROUTINE CASE: Do NOT create hospital ticket. Provide tailored health advice & doctor booking
+            # 🟢 MILD / ROUTINE CASE: Provide tailored advice + Token info
             remedies = assessment.home_remedies
             remedies_text = "\n".join([f"• {r}" for r in remedies]) if remedies else "• Warm water hydration\n• Adequate rest and monitoring"
+
+            token_info = f"\n\n🎟️ **Clinic Queue Token**: `{token.token_number}` (Position #{token.position} at {fac_name})"
 
             response = (
                 f"🟢 **{get_text('urgency', lang)}: {urgency}**\n\n"
                 f"{assessment.advisory_summary}\n\n"
                 f"{get_text('home_remedies_header', lang)}\n"
-                f"{remedies_text}\n\n"
+                f"{remedies_text}"
+                f"{token_info}\n\n"
                 f"_{assessment.mandatory_disclaimer}_"
             )
 

@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
+import AmbulanceLoadingScreen from './components/common/AmbulanceLoadingScreen';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/patient/DashboardPage';
@@ -21,11 +22,19 @@ import MedicineInventory from './pages/facility/MedicineInventory';
 import Navbar from './components/common/Navbar';
 
 export default function App() {
+  const [showLoading, setShowLoading] = useState(() => {
+    return !sessionStorage.getItem('sehat_intro_seen');
+  });
   const { loadFromStorage, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     loadFromStorage();
   }, [loadFromStorage]);
+
+  const handleLoadingComplete = () => {
+    sessionStorage.setItem('sehat_intro_seen', 'true');
+    setShowLoading(false);
+  };
 
   const role = user?.role;
   const defaultHome = role === 'DOCTOR' 
@@ -33,6 +42,10 @@ export default function App() {
     : role === 'FACILITY_ADMIN' 
     ? '/facility/dashboard' 
     : '/dashboard';
+
+  if (showLoading) {
+    return <AmbulanceLoadingScreen onComplete={handleLoadingComplete} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

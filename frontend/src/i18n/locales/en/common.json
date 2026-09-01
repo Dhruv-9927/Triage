@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "home": "Home",
+    "triage": "Triage",
+    "appointments": "Appointments",
+    "queue": "Queue",
+    "records": "Health Records",
+    "family": "Family",
+    "doctorDashboard": "Doctor Dashboard",
+    "facilityDashboard": "Facility Dashboard"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "loginButton": "Log In",
+    "logout": "Log Out",
+    "registerButton": "Register",
+    "noAccount": "Don't have an account? Register",
+    "hasAccount": "Already have an account? Login"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "quickActions": "Quick Actions",
+    "checkSymptoms": "Check Symptoms",
+    "bookAppointment": "Book Appointment",
+    "myQueue": "My Queue",
+    "healthRecords": "Health Records",
+    "recentActivity": "Recent Activity"
+  },
+  "triage": {
+    "title": "AI Health Assistant",
+    "subtitle": "Describe your symptoms",
+    "enterSymptoms": "Enter your symptoms...",
+    "voiceInput": "Voice Input",
+    "listening": "Listening...",
+    "processing": "Processing your symptoms...",
+    "result": "Assessment Result",
+    "disclaimer": "⚠️ This is NOT a medical diagnosis. Please confirm with a qualified doctor.",
+    "viewFacilities": "View Recommended Facilities",
+    "tryAgain": "Try Again"
+  },
+  "facility": {
+    "recommended": "Recommended Facilities",
+    "available": "Available",
+    "doctors": "Doctors",
+    "beds": "Beds",
+    "medicines": "Medicines",
+    "distance": "Distance",
+    "score": "Match Score",
+    "bookHere": "Book Here",
+    "noResults": "No facilities found matching your criteria."
+  },
+  "appointment": {
+    "book": "Book Appointment",
+    "selectDoctor": "Select Doctor",
+    "selectSlot": "Select Time Slot",
+    "confirm": "Confirm Booking",
+    "booked": "Successfully booked!",
+    "cancelled": "Appointment cancelled"
+  },
+  "queue": {
+    "myTokens": "My Tokens",
+    "position": "Position in queue",
+    "estimatedWait": "Estimated wait",
+    "minutes": "mins",
+    "checkin": "Check In",
+    "yourTurn": "It's your turn!",
+    "waiting": "Waiting"
+  },
+  "consultation": {
+    "video": "Video Call",
+    "voice": "Voice Call",
+    "chat": "Chat",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "ended": "Consultation Ended",
+    "lowBandwidth": "Low Bandwidth Detected",
+    "switchToVoice": "Switch to Voice"
+  },
+  "records": {
+    "title": "Health Records",
+    "pastVisits": "Past Visits",
+    "prescriptions": "Prescriptions",
+    "testResults": "Test Results",
+    "noRecords": "No records found"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "offline": "Offline",
+    "online": "Online",
+    "syncing": "Syncing...",
+    "synced": "Synced",
+    "pending": "Pending",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "filter": "Filter",
+    "noData": "No data available"
+  },
+  "urgency": {
+    "emergency": "Emergency",
+    "urgent": "Urgent",
+    "routine": "Routine",
+    "selfCare": "Self Care",
+    "emergencyDesc": "Requires immediate medical attention.",
+    "urgentDesc": "Should be seen by a doctor soon.",
+    "routineDesc": "Can wait for a scheduled appointment.",
+    "selfCareDesc": "Can be managed at home."
+  }
+}

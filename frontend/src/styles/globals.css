@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #FAF7F2;
+    color: #2B2620;
+    font-family: 'Plus Jakarta Sans', Inter, 'Noto Sans Devanagari', sans-serif;
+  }
+
+  h1, h2, h3, .font-serif-heading {
+    font-family: 'Lora', 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.015em;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.offline-mode {
+  filter: grayscale(15%);
+}
+
+.urgency-emergency { @apply bg-emergency text-white; }
+.urgency-urgent { @apply bg-urgent text-white; }
+.urgency-routine { @apply bg-routine text-white; }
+.urgency-selfcare { @apply bg-selfcare text-white; }
+
+/* Clean A4 Prescription Print Rules */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-prescription-slip, #printable-prescription-slip * {
+    visibility: visible;
+  }
+  #printable-prescription-slip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 24px;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  nav, header, footer, .print\:hidden {
+    display: none !important;
+  }
+}

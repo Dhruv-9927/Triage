@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "home": "होम",
+    "triage": "ट्रायज",
+    "appointments": "अपॉइंटमेंट्स",
+    "queue": "कतार",
+    "records": "स्वास्थ्य रिकॉर्ड",
+    "family": "परिवार",
+    "doctorDashboard": "डॉक्टर डैशबोर्ड",
+    "facilityDashboard": "सुविधा डैशबोर्ड"
+  },
+  "auth": {
+    "login": "लॉग इन",
+    "register": "रजिस्टर",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "fullName": "पूरा नाम",
+    "phone": "फ़ोन नंबर",
+    "loginButton": "लॉग इन करें",
+    "logout": "लॉग आउट",
+    "registerButton": "रजिस्टर करें",
+    "noAccount": "अकाउंट नहीं है? रजिस्टर करें",
+    "hasAccount": "पहले से अकाउंट है? लॉग इन करें"
+  },
+  "dashboard": {
+    "welcome": "वापसी पर स्वागत है",
+    "quickActions": "त्वरित क्रियाएँ",
+    "checkSymptoms": "लक्षण जांचें",
+    "bookAppointment": "अपॉइंटमेंट बुक करें",
+    "myQueue": "मेरी कतार",
+    "healthRecords": "स्वास्थ्य रिकॉर्ड",
+    "recentActivity": "हाल की गतिविधि"
+  },
+  "triage": {
+    "title": "AI स्वास्थ्य सहायक",
+    "subtitle": "अपने लक्षणों का वर्णन करें",
+    "enterSymptoms": "अपने लक्षण दर्ज करें...",
+    "voiceInput": "वॉयस इनपुट",
+    "listening": "सुन रहा हूँ...",
+    "processing": "आपके लक्षणों की जांच हो रही है...",
+    "result": "मूल्यांकन परिणाम",
+    "disclaimer": "⚠️ यह चिकित्सा निदान नहीं है। कृपया योग्य चिकित्सक से पुष्टि करें।",
+    "viewFacilities": "अनुशंसित सुविधाएँ देखें",
+    "tryAgain": "पुनः प्रयास करें"
+  },
+  "facility": {
+    "recommended": "अनुशंसित सुविधाएँ",
+    "available": "उपलब्ध",
+    "doctors": "डॉक्टर",
+    "beds": "बेड",
+    "medicines": "दवाइयाँ",
+    "distance": "दूरी",
+    "score": "मैच स्कोर",
+    "bookHere": "यहाँ बुक करें",
+    "noResults": "आपके मानदंडों से मेल खाने वाली कोई सुविधा नहीं मिली।"
+  },
+  "appointment": {
+    "book": "अपॉइंटमेंट बुक करें",
+    "selectDoctor": "डॉक्टर चुनें",
+    "selectSlot": "समय चुनें",
+    "confirm": "बुकिंग की पुष्टि करें",
+    "booked": "सफलतापूर्वक बुक किया गया!",
+    "cancelled": "अपॉइंटमेंट रद्द किया गया"
+  },
+  "queue": {
+    "myTokens": "मेरे टोकन",
+    "position": "कतार में स्थिति",
+    "estimatedWait": "अनुमानित प्रतीक्षा",
+    "minutes": "मिनट",
+    "checkin": "चेक इन करें",
+    "yourTurn": "आपकी बारी है!",
+    "waiting": "प्रतीक्षा में"
+  },
+  "consultation": {
+    "video": "वीडियो कॉल",
+    "voice": "वॉयस कॉल",
+    "chat": "चैट",
+    "connecting": "कनेक्ट हो रहा है...",
+    "connected": "कनेक्टेड",
+    "ended": "परामर्श समाप्त",
+    "lowBandwidth": "धीमा नेटवर्क",
+    "switchToVoice": "वॉयस पर स्विच करें"
+  },
+  "records": {
+    "title": "स्वास्थ्य रिकॉर्ड",
+    "pastVisits": "पिछली विज़िट",
+    "prescriptions": "नुस्खे",
+    "testResults": "टेस्ट रिपोर्ट",
+    "noRecords": "कोई रिकॉर्ड नहीं मिला"
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "एक त्रुटि हुई",
+    "retry": "पुनः प्रयास करें",
+    "offline": "ऑफ़लाइन",
+    "online": "ऑनलाइन",
+    "syncing": "सिंक हो रहा है...",
+    "synced": "सिंक हो गया",
+    "pending": "लंबित",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "confirm": "पुष्टि करें",
+    "back": "वापस",
+    "next": "अगला",
+    "search": "खोजें",
+    "filter": "फ़िल्टर",
+    "noData": "कोई डेटा उपलब्ध नहीं"
+  },
+  "urgency": {
+    "emergency": "आपातकालीन",
+    "urgent": "तत्काल",
+    "routine": "सामान्य",
+    "selfCare": "स्व-देखभाल",
+    "emergencyDesc": "तत्काल चिकित्सा सहायता की आवश्यकता है।",
+    "urgentDesc": "जल्द ही डॉक्टर को दिखाना चाहिए।",
+    "routineDesc": "निर्धारित अपॉइंटमेंट की प्रतीक्षा कर सकते हैं।",
+    "selfCareDesc": "घर पर प्रबंधित किया जा सकता है।"
+  }
+}

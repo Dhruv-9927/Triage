@@ -15,4 +15,5 @@ instructor==1.7.2
 openai==1.58.1
 anthropic==0.40.0
 httpx==0.28.1
-psycopg2-binary==2.9.10
+aiosqlite>=0.20.0
+email-validator>=2.0.0

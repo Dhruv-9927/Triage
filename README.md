@@ -1,10 +1,10 @@
-# 🏥 Triage+ (SeHAT) — Smart e-Health Access & Triage Platform
+# Triage — Smart e-Health Access & Triage Platform
 
 A resilient, multilingual, low-bandwidth healthcare routing and OPD triage ecosystem connecting rural and underserved patients to doctors, clinics, pharmacies, and emergency services. Designed to operate seamlessly across high-latency environments, offline situations, and zero-data Telegram fallbacks.
 
 ---
 
-## 📌 Executive Summary
+##  Executive Summary
 
 Rural and tier-2/3 healthcare systems frequently suffer from overcrowding, lack of triaging, language barriers, and intermittent network connectivity. **Triage+ (SeHAT)** resolves this by unifying:
 1. **AI-Driven Clinical Triage**: Multilingual symptom assessment classifying urgency (`EMERGENCY`, `URGENT`, `ROUTINE`) and providing actionable medical next-steps.
@@ -16,7 +16,7 @@ Rural and tier-2/3 healthcare systems frequently suffer from overcrowding, lack 
 
 ---
 
-## 🏗️ Architecture & Component Flow
+##  Architecture & Component Flow
 
 ```
    ┌────────────────────────────────────────────────────────────────────────┐
@@ -56,27 +56,27 @@ Rural and tier-2/3 healthcare systems frequently suffer from overcrowding, lack 
 
 ---
 
-## 🌟 Core Features
+##  Core Features
 
-### 1. 🤖 Zero-Data Telegram Bot Integration (`@TriageSmartBot`)
+### 1. Zero-Data Telegram Bot Integration (`@TriageSmartBot`)
 - **Multilingual Support**: English, Hindi, Marathi, Tamil, and Telugu.
 - **Symptom Triage**: Send text or voice note symptoms; receives clinical summary, urgency level, and self-care remedies.
 - **Dynamic Hospital Discovery**: Geocodes city/area names or user GPS pins to query live operational hospitals via OpenStreetMap.
 - **Live OPD Queue Booking**: Automatically generates sequential tokens (`TKN-YYYYMMDD-XXX`) and updates the patient as queue advances.
 
-### 2. 👨‍⚕️ Clinician & Doctor Dashboard (`/doctor/dashboard`)
+### 2.  Clinician & Doctor Dashboard (`/doctor/dashboard`)
 - **Active Queue Tab**: Displays live sequence of waiting patients with urgent triage tags, estimated wait times, and channel badges (`📱 Telegram` vs `🌐 Web`).
 - **Telegram Triage Feed Tab**: Real-time feed of symptom queries sent by Telegram patients with raw symptoms, AI assessment, and language.
 - **One-Click Call & Advance**: Call next patient, mark encounters as completed, and auto-notify remaining patients in line.
 - **Consultation Suite**: Direct transition into video, voice, or chat consultation with clinical notes and e-prescription generator.
 
-### 3. 🚑 Ambulance Loading Screen
+### 3.  Ambulance Loading Screen
 - Animated realistic SVG ambulance with flashing emergency beacons (red/blue), revolving wheels, speed trails, and hospital scenery.
 - 5 diagnostic status messages indicating subsystem readiness.
 - Runs exclusively on initial application start per session (stored via `sessionStorage`).
 - Tap anywhere to immediately skip directly to login.
 
-### 4. 🏥 Facility & Resource Management
+### 4.  Facility & Resource Management
 - Real-time bed occupancy tracker across General Wards, ICU, Emergency, and NICU.
 - Essential pharmacy and medicine inventory tracking with automatic low-stock alerts.
 
@@ -97,7 +97,7 @@ Rural and tier-2/3 healthcare systems frequently suffer from overcrowding, lack 
 
 ---
 
-## 🔑 Demo Credentials
+##  Demo Credentials
 
 | Role | Email | Password | Access Area |
 |---|---|---|---|
@@ -107,7 +107,7 @@ Rural and tier-2/3 healthcare systems frequently suffer from overcrowding, lack 
 
 ---
 
-## ⚙️ Environment Configuration (`.env`)
+##  Environment Configuration (`.env`)
 
 Create a `.env` file in both root and `backend/`:
 
@@ -139,7 +139,7 @@ ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000,http://127.0.0.1:517
 
 ---
 
-## 🚀 Step-by-Step Setup & Running Guide
+##  Step-by-Step Setup & Running Guide
 
 ### 1. Prerequisites
 - **Node.js**: v18.0.0 or higher
@@ -213,49 +213,49 @@ Bot will connect via long-polling:
 
 ---
 
-## 📡 REST API Reference
+##  REST API Reference
 
-### 🔐 Authentication (`/api/v1/auth`)
+###  Authentication (`/api/v1/auth`)
 - `POST /api/v1/auth/register` — Register a new patient, doctor, or facility admin account.
 - `POST /api/v1/auth/login` — Login and receive JWT bearer access and refresh tokens.
 - `GET /api/v1/auth/me` — Retrieve the currently authenticated user profile.
 
-### 🩺 Triage Assessment (`/api/v1/triage`)
+###  Triage Assessment (`/api/v1/triage`)
 - `POST /api/v1/triage/assess` — Process symptoms with AI, generate urgency classification, advisory, and fetch nearby matching facilities.
 - `GET /api/v1/triage/history` — Get list of all real-time triage sessions across Web and Telegram channels.
 
-### 📅 Appointments (`/api/v1/appointments`)
+###  Appointments (`/api/v1/appointments`)
 - `GET /api/v1/appointments` — Fetch appointments (sorted newest-first, enriched with patient names, queue tokens, and Telegram channel flags).
 - `POST /api/v1/appointments` — Book a new appointment and generate sequential queue token.
 - `GET /api/v1/appointments/{id}` — Get single appointment details.
 - `PATCH /api/v1/appointments/{id}` — Update appointment status (`SCHEDULED`, `COMPLETED`, `CANCELLED`) and clinical notes.
 
-### 🎟️ Queue Management (`/api/v1/queue`)
+###  Queue Management (`/api/v1/queue`)
 - `GET /api/v1/queue/my-tokens` — Retrieve queue tokens for patient view.
 - `POST /api/v1/queue/advance` — Advance doctor queue by 1, mark current patient completed, and re-calculate ETA for remaining patients.
 - `POST /api/v1/queue/{token_id}/complete` — Mark specific token completed.
 
-### 🏥 Facilities & Resources (`/api/v1/facilities`)
+###  Facilities & Resources (`/api/v1/facilities`)
 - `GET /api/v1/facilities` — List all facilities and clinics.
 - `GET /api/v1/facilities/{id}/beds` — View live bed status (Available, Occupied, Cleaning).
 - `GET /api/v1/facilities/{id}/medicines` — Pharmacy stock and essential inventory list.
 
 ---
 
-## 📱 Telegram Bot Command Flows
+##  Telegram Bot Command Flows
 
 | Command / Action | Description |
 |---|---|
 | `/start` | Reset state, display multilingual welcome menu (English, Hindi, Marathi, Tamil, Telugu). |
-| `🩺 Start AI Triage` | Prompt user for symptoms via voice note or text message; returns urgency and clinical summary. |
-| `📍 Nearby Hospitals` | Select a major city or share GPS pin / custom area name to query nearby live hospitals. |
-| `📅 Book Appointment`| Select hospital, choose attending doctor, pick a time slot, and confirm OPD booking. |
-| `🎟️ My Queue Token` | View live queue position, estimated wait time, and hospital instructions. |
-| `🚨 Emergency (108)` | Instant emergency dispatch guidance and toll-free helpline connection. |
+| ` Start AI Triage` | Prompt user for symptoms via voice note or text message; returns urgency and clinical summary. |
+| ` Nearby Hospitals` | Select a major city or share GPS pin / custom area name to query nearby live hospitals. |
+| ` Book Appointment`| Select hospital, choose attending doctor, pick a time slot, and confirm OPD booking. |
+| ` My Queue Token` | View live queue position, estimated wait time, and hospital instructions. |
+| ` Emergency (108)` | Instant emergency dispatch guidance and toll-free helpline connection. |
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 Triage-main/
@@ -324,7 +324,7 @@ Triage-main/
 
 ---
 
-## 🛡️ License & Acknowledgments
+##  License & Acknowledgments
 
 - **License**: MIT Open Source License.
 - **Data Sources**: OpenStreetMap / Nominatim contributors.

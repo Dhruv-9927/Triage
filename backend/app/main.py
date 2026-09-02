@@ -14,9 +14,24 @@ from app.services.channel_notifier import register_all_listeners
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan: initialize DB, set up Telegram bot webhook."""
+    """Application lifespan: initialize DB, auto-seed if empty, set up Telegram bot."""
     await init_db()
     register_all_listeners()
+
+    # Auto-seed database if empty (ensures demo accounts work on fresh cloud deployments)
+    try:
+        from app.database import async_session
+        from app.models.user import User
+        from sqlalchemy.future import select
+        async with async_session() as session:
+            res = await session.execute(select(User).limit(1))
+            if not res.scalars().first():
+                print("[SEED] Fresh database detected. Auto-seeding demo users and clinics...")
+                from app.seed.seed_data import seed
+                await seed()
+                print("[SEED] Auto-seeding completed successfully!")
+    except Exception as e:
+        print(f"[SEED WARNING] Auto-seed failed or skipped: {e}")
 
     # Initialize Telegram bot if token is configured
     bot_task = None
@@ -60,10 +75,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware supporting localhost, Vercel deployments (*.vercel.app), and all origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS.split(","),
+    allow_origins=["*"],
+    allow_origin_regex=r"^https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

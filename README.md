@@ -1,7 +1,7 @@
 # Triage — Smart e-Health Access & Triage Platform
 
 A resilient, multilingual, low-bandwidth healthcare routing and OPD triage ecosystem connecting rural and underserved patients to doctors, clinics, pharmacies, and emergency services. Designed to operate seamlessly across high-latency environments, offline situations, and zero-data Telegram fallbacks.
-
+Live Deployed - "https://triage-black-nu.vercel.app/"
 ---
 
 ##  Executive Summary

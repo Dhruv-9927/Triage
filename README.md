@@ -322,7 +322,50 @@ Triage-main/
 └── README.md                             # Project documentation
 ```
 
+##  Live Deployments & Demo Links
+
+| Service | Platform | Live URL / Handle | Status |
+|---|---|---|---|
+| **Web Application (PWA)** | **Vercel** | `https://triage-black-nu.vercel.app/` | 🟢 Online |
+| **Backend REST API** | **Render** | `https://triage-backend-4moo.onrender.com` | 🟢 Online |
+| **Interactive API Docs** | **Render (Swagger)** | `https://triage-backend-4moo.onrender.com/docs` | 🟢 Online |
+| **Zero-Data Telegram Bot** | **Telegram** | [@TriageSmartBot](https://t.me/TriageSmartBot) | 🟢 Active 24/7 |
+
+ Demo Credentials for Live Testing
+Use these pre-seeded accounts to explore the portals:
+
+ Clinician / Doctor Station:
+
+Email: doctor@demo.com
+Password: demo1234
+Direct Access: /doctor/dashboard (Live OPD queue & Telegram triage stream)
+ Patient Portal:
+
+Email: patient@demo.com
+Password: demo1234
+Direct Access: /dashboard (Symptom check, doctor booking, prescriptions)
+ Facility Admin:
+
+Email: admin@demo.com
+Password: demo1234
+Direct Access: /facility/dashboard (Bed occupancy & medicine inventory)
+
+
+ Live Verification & Testing Flow
+Open the Doctor Station on your browser (/doctor/dashboard) using doctor@demo.com.
+Open Telegram and message @TriageSmartBot:
+Send /start and select your language.
+Tap " Start AI Triage" and type your symptoms (e.g. "High fever and difficulty breathing").
+Watch the Doctor Station:
+The symptom report immediately appears under the Telegram Triage Feed tab.
+An OPD appointment token is created on the Active Queue with urgency markers.
+The doctor can click "Start Consult" or "Call Next Patient" to advance the queue in real-time.
+
 ---
+
+## ☁️ 100% Free Production Deployment Architecture
+
+The system is engineered to run completely free on cloud infrastructure without requiring paid server tiers or separate worker instances.
 
 ##  License & Acknowledgments
 

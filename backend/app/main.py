@@ -19,9 +19,10 @@ async def lifespan(app: FastAPI):
     register_all_listeners()
 
     # Initialize Telegram bot if token is configured
-
+    bot_task = None
     if settings.TELEGRAM_BOT_TOKEN:
         try:
+            import asyncio
             from app.bot.bot import bot, dp
             if settings.TELEGRAM_WEBHOOK_URL:
                 await bot.set_webhook(
@@ -30,16 +31,22 @@ async def lifespan(app: FastAPI):
                 )
                 print(f"Telegram webhook set: {settings.TELEGRAM_WEBHOOK_URL}/webhook/telegram")
             else:
-                print("Telegram bot token set but no webhook URL configured. Bot will not receive updates.")
+                # Start non-blocking polling inside FastAPI process
+                await bot.delete_webhook(drop_pending_updates=True)
+                bot_info = await bot.get_me()
+                print(f"[ONLINE] Telegram Bot polling started: @{bot_info.username}")
+                bot_task = asyncio.create_task(dp.start_polling(bot, handle_signals=False))
         except Exception as e:
             print(f"Warning: Failed to initialize Telegram bot: {e}")
 
     yield
 
-    # Cleanup: delete webhook and close bot session
+    # Cleanup: cancel polling / delete webhook and close bot session
     if settings.TELEGRAM_BOT_TOKEN:
         try:
             from app.bot.bot import bot
+            if bot_task:
+                bot_task.cancel()
             await bot.delete_webhook()
             await bot.session.close()
         except Exception:

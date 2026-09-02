@@ -59,7 +59,7 @@ export default function LoginPage() {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      toast.error('Quick login failed');
+      toast.error(err.response?.data?.detail || err.message || 'Quick login failed');
     } finally {
       setIsLoading(false);
     }
